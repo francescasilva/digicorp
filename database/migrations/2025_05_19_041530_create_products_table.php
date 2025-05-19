@@ -16,6 +16,7 @@ return new class extends Migration
         $table->string('name'); // Nombre del producto
         $table->integer('quantity'); // Cantidad
         $table->decimal('price', 8, 2); // Precio
+        $table->string('image')->nullable();
         $table->timestamps();
     });
    }
