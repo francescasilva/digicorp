@@ -35,7 +35,7 @@
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           alert('Login exitoso: ' + userCredential.user.email);
-          window.location.href = "/dashboard";
+          window.location.href = "/products";
         })
         .catch((error) => {
           alert('Error: ' + error.message);

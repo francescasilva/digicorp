@@ -14,11 +14,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         // Aquí luego pondremos el código para autenticar al usuario.
-        return redirect('/dashboard');
+        return redirect('/products');
     }
 
-    public function dashboard()
-    {
-        return view('dashboard');  // Esto buscará la vista en resources/views/dashboard.blade.php
-    }
+    
 }
