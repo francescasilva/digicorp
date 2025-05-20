@@ -206,9 +206,9 @@ async function mostrarCarrito() {
 
       contenedor.innerHTML = `
        <h3 class="mb-3 fw-bold">🛒 Tu Carrito</h3>
-  <ul class="list-group mb-3">
-    ${items.map((item, index) => `
-      <li class="list-group-item d-flex align-items-center justify-content-between">
+       <ul class="list-group mb-3">
+       ${items.map((item, index) => `
+       <li class="list-group-item d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
           <img src="${item.image}" alt="${item.name}" class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
           <div>
@@ -235,10 +235,10 @@ async function mostrarCarrito() {
       document.getElementById('finalizar-compra-btn').addEventListener('click', finalizarCompra);
     }
 
-    contenedor.style.display = 'block';
-  } else {
-    contenedor.innerHTML = "<h3>Carrito:</h3><p>Carrito vacío.</p>";
-    contenedor.style.display = 'block';
+        contenedor.style.display = 'block';
+     } else {
+      contenedor.innerHTML = "<h3>Carrito:</h3><p>Carrito vacío.</p>";
+      contenedor.style.display = 'block';
   }
 }
 
