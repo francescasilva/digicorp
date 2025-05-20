@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mini E-commerce</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
   <link rel="stylesheet" href="{{ asset('css/product.css') }}">
 
 </head>
@@ -23,7 +24,9 @@
      <!-- Carrito -->
      <div class="col-md-4">
       <button id="boton-carrito" onclick="mostrarCarrito()">🛒</button>
+      <div id="overlay" class="overlay"></div>
        <div id="carrito-contenido" class="carrito-flotante"></div>
+
      </div>
     </div>
    
@@ -150,13 +153,19 @@
     const name = card.querySelector('h3').textContent;
     const priceText = card.querySelector('.price').textContent;
     const price = parseFloat(priceText.replace('Precio: $', ''));
+    const image = card.querySelector('img')?.src || ''; // <- extraer la imagen
+    const stockText = card.querySelector('p:nth-of-type(2)')?.textContent || '';
+    const stock = parseInt(stockText.replace('Stock: ', '')) || 0;
 
     await setDoc(cartRef, {
       items: arrayUnion({
         productId: String(productId), // <- Asegúrate que es string
         name: name,
         price: price,
-        quantity: 1
+        quantity: 1,
+        image: image,  // 👈 AÑADIR AQUÍ
+        stock: stock   // 👈 Opcional: si quieres mostrar stock en el carrito
+      
       })
     }, { merge: true });
 
@@ -174,6 +183,7 @@ async function mostrarCarrito() {
   const user = auth.currentUser;
   const contenedor = document.getElementById('carrito-contenido');
 
+
   if (!user) {
     alert("Debes iniciar sesión para ver el carrito.");
     return;
@@ -186,25 +196,41 @@ async function mostrarCarrito() {
     const items = cartSnap.data().items || [];
 
     if (items.length === 0) {
-      contenedor.innerHTML = "<h3>Carrito:</h3><p>El carrito está vacío.</p>";
+      contenedor.innerHTML = `
+        <h3>Carrito:</h3>
+        <p>El carrito está vacío.</p>
+      `;
     } else {
       // Calcular total
       const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
       contenedor.innerHTML = `
-        <h3>Carrito:</h3>
-        <ul>
-          ${items.map((item, index) => `
-            <li>
-              ${item.name} - $${item.price} (x${item.quantity})
-              <button onclick="eliminarDelCarrito('${item.productId}', ${index})" class="btn btn-danger" aria-label="Eliminar producto" ><i class="bi bi-trash"></i></button>
-            </li>
-          `).join("")}
-        </ul>
-        <p><strong>Total: $${total.toFixed(2)}</strong></p>
-        <button id="finalizar-compra-btn" class="btn btn-success">Finalizar compra</button>
-      `;
+       <h3 class="mb-3 fw-bold">🛒 Tu Carrito</h3>
+  <ul class="list-group mb-3">
+    ${items.map((item, index) => `
+      <li class="list-group-item d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <img src="${item.image}" alt="${item.name}" class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
+          <div>
+            <h5 class="mb-1 fw-semibold">${item.name}</h5>
+            <p class="mb-1 fw-semibold" style="color: #4a148c; font-family: 'Arial', Helvetica, sans-serif;">Precio: <strong>$${item.price}</strong></p>
+            <p class="mb-1">Cantidad: <strong>${item.quantity}</strong></p>
+            
+          </div>
+        </div>
+        <button onclick="eliminarDelCarrito('${item.productId}', ${index})" class="btn btn-sm btn-outline-danger" aria-label="Eliminar producto">
+          <i class="bi bi-trash"></i>
+        </button>
+      </li>
+    `).join("")}
+  </ul>
 
+  <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded">
+    <h5 class="m-0 fw-bold text-success">Total: $${total.toFixed(2)}</h5>
+    <button id="finalizar-compra-btn" class="btn btn-success">Finalizar compra</button>
+  </div>
+`;
+       
       // Agregar evento al botón finalizar compra
       document.getElementById('finalizar-compra-btn').addEventListener('click', finalizarCompra);
     }
@@ -234,6 +260,7 @@ window.finalizarCompra = async function () {
 
     // Ocultar carrito
     document.getElementById("carrito-contenido").style.display = "none";
+    
 
     // Cambiar todos los botones de productos a "Comprar"
     const botones = document.querySelectorAll('.product-card button');
