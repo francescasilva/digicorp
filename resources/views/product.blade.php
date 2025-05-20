@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mini E-commerce</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -121,9 +123,22 @@
 <body>
 
   <h2>Mini E-commerce</h2>
-  <div id="product-list">Cargando productos...</div>
-  <button onclick="mostrarCarrito()">Ver carrito</button>
-  <div id="carrito-contenido"></div>
+<div class="container mt-4">
+  <div class="row">
+    <!-- Productos -->
+    <div class="col-md-8">
+      <div id="product-list">Cargando productos...</div>
+    </div>
+
+    <!-- Carrito -->
+    <div class="col-md-4">
+      <div id="carrito-contenido" style="display: none;"></div>
+      <button onclick="mostrarCarrito()" type="button" class="btn btn-primary">
+       <i class="bi bi-cart"></i> Ver carrito
+      </button>
+    </div>
+  </div>
+</div>
 
   <!-- Firebase -->
   <script type="module">
@@ -239,36 +254,39 @@
     };
 
     // Mostrar carrito
-    async function mostrarCarrito() {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          const cartRef = doc(db, "carts", user.uid);
-          const cartSnap = await getDoc(cartRef);
+   async function mostrarCarrito() {
+  const user = auth.currentUser;
 
-          const contenedor = document.getElementById('carrito-contenido');
-          contenedor.innerHTML = ''; // Limpiar
+  if (user) {
+    const cartRef = doc(db, "carts", user.uid);
+    const cartSnap = await getDoc(cartRef);
+    const contenedor = document.getElementById('carrito-contenido');
 
-          if (cartSnap.exists()) {
-            const items = cartSnap.data().items || [];
-            if (items.length === 0) {
-              contenedor.textContent = "El carrito está vacío.";
-            } else {
-              contenedor.innerHTML = "<h3>Carrito:</h3><ul>" +
-                items.map((item, index) => `
-       <li>
-        ${item.name} - $${item.price} (x${item.quantity})
-       <button onclick="eliminarDelCarrito(${item.productId}, ${index})">Eliminar</button>
-       </li>`).join("") +"</ul>";
-                
-            }
-          } else {
-            contenedor.textContent = "Carrito vacío.";
-          }
-        } else {
-          alert("Debes iniciar sesión para ver el carrito.");
-        }
-      });
+    if (cartSnap.exists()) {
+      const items = cartSnap.data().items || [];
+
+      if (items.length === 0) {
+        contenedor.innerHTML = "<h3>Carrito:</h3><p>El carrito está vacío.</p>";
+      } else {
+        contenedor.innerHTML = "<h3>Carrito:</h3><ul>" +
+          items.map((item, index) => `
+            <li>
+              ${item.name} - $${item.price} (x${item.quantity})
+              <button onclick="eliminarDelCarrito('${item.productId}', ${index})">Eliminar</button>
+            </li>
+          `).join("") + "</ul>";
+      }
+
+      contenedor.style.display = 'block';
+    } else {
+      contenedor.innerHTML = "<h3>Carrito:</h3><p>Carrito vacío.</p>";
+      contenedor.style.display = 'block';
     }
+  } else {
+    alert("Debes iniciar sesión para ver el carrito.");
+  }
+}
+
 
     window.mostrarCarrito = mostrarCarrito;
     window.eliminarDelCarrito = async function (productId, index) {
