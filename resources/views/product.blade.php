@@ -52,91 +52,118 @@
 
     // Cargar productos desde tu API
     async function cargarProductos() {
-      try {
-        const response = await fetch('http://localhost:8000/api/products');
-        if (!response.ok) throw new Error('No se pudo obtener los productos');
-        const data = await response.json();
+  try {
+    const response = await fetch('http://localhost:8000/api/products');
+    if (!response.ok) throw new Error('No se pudo obtener los productos');
+    const data = await response.json();
 
-        const list = document.getElementById('product-list');
-        list.innerHTML = '';
+    const list = document.getElementById('product-list');
+    list.innerHTML = '';
 
-        if (data.length === 0) {
-          list.textContent = 'No hay productos disponibles.';
-          return;
-        }
-
-        data.forEach(product => {
-          const card = document.createElement('div');
-          card.className = 'product-card';
-
-          // Asegúrate que product.id sea string para evitar problemas en onclick
-          card.innerHTML = `
-            <img src="${product.image}" alt="${product.name}">
-            <h3>${product.name}</h3>
-            <p class="price">Precio: $${product.price}</p>
-            <p>Stock: ${product.quantity}</p>
-            <button data-product-id="${product.id}">🛒Comprar</button>
-          `;
-
-          list.appendChild(card);
-        });
-
-        // Agregar event listeners a botones después de renderizar
-        document.querySelectorAll('.product-card button').forEach(button => {
-          button.addEventListener('click', () => {
-            const id = button.getAttribute('data-product-id');
-            addToCart(id);
-          });
-        });
-
-      } catch (error) {
-        console.error('Error al obtener los productos:', error);
-        document.getElementById('product-list').textContent = 'Error al cargar productos.';
-      }
+    if (data.length === 0) {
+      list.textContent = 'No hay productos disponibles.';
+      return;
     }
 
-    cargarProductos();
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
 
-    // Función para agregar producto al carrito
-    window.addToCart = async function (productId) {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          try {
-            // Para simplificar: buscar el producto en la lista actual en DOM
-            const productCard = [...document.querySelectorAll('.product-card')].find(card => {
-              return card.querySelector('button').getAttribute('data-product-id') === productId;
-            });
-
-            if (!productCard) {
-              alert('Producto no encontrado');
-              return;
-            }
-
-            const name = productCard.querySelector('h3').textContent;
-            const priceText = productCard.querySelector('.price').textContent;
-            const price = parseFloat(priceText.replace('Precio: $', ''));
-
-            const cartRef = doc(db, "carts", user.uid);
-
-            await setDoc(cartRef, {
-              items: arrayUnion({
-                productId: productId,
-                name: name,
-                price: price,
-                quantity: 1
-              })
-            }, { merge: true });
-
-            alert('Producto agregado al carrito correctamente.');
-          } catch (error) {
-            console.error("Error al agregar al carrito:", error);
-            alert("Hubo un error al agregar el producto al carrito.");
-          }
-        } else {
-          alert("Debes iniciar sesión para agregar al carrito.");
+    onAuthStateChanged(auth, async (user) => {
+      let cartItems = [];
+      if (user) {
+        const cartRef = doc(db, "carts", user.uid);
+        const cartSnap = await getDoc(cartRef);
+        if (cartSnap.exists()) {
+          cartItems = cartSnap.data().items || [];
         }
+      }
+
+      data.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+
+        const inCart = cartItems.some(item => item.productId === product.id);
+
+        card.innerHTML = `
+          <img src="${product.image}" alt="${product.name}">
+          <h3>${product.name}</h3>
+          <p class="price">Precio: $${product.price}</p>
+          <p>Stock: ${product.quantity}</p>
+          <button data-product-id="${product.id}">
+            ${inCart ? '🛒Quitar' : '🛒Comprar'}
+          </button>
+        `;
+
+        list.appendChild(card);
       });
-    };
+
+      // Event listeners
+      document.querySelectorAll('.product-card button').forEach(button => {
+        button.addEventListener('click', () => {
+          const id = button.getAttribute('data-product-id');
+          toggleCart(id, button);
+        });
+      });
+    });
+
+  } catch (error) {
+    console.error('Error al obtener los productos:', error);
+    document.getElementById('product-list').textContent = 'Error al cargar productos.';
+  }
+}
+     cargarProductos()
+     
+    async function toggleCart(productId, button) {
+  const auth = window.firebaseAuth;
+  const db = window.firebaseDb;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      alert("Debes iniciar sesión para agregar o quitar productos.");
+      return;
+    }
+
+    const cartRef = doc(db, "carts", user.uid);
+    const cartSnap = await getDoc(cartRef);
+    let items = [];
+
+    if (cartSnap.exists()) {
+      items = cartSnap.data().items || [];
+    }
+
+    const index = items.findIndex(item => item.productId === productId);
+
+    if (index !== -1) {
+  // Ya está en carrito -> quitar
+  items.splice(index, 1);
+  await setDoc(cartRef, { items }, { merge: true });
+  alert("Producto eliminado del carrito.");
+  button.textContent = "🛒Comprar";
+  button.classList.remove("btn-quitar");
+} else {
+  // No está en carrito -> agregar
+  const card = button.closest('.product-card');
+  const name = card.querySelector('h3').textContent;
+  const priceText = card.querySelector('.price').textContent;
+  const price = parseFloat(priceText.replace('Precio: $', ''));
+
+  await setDoc(cartRef, {
+    items: arrayUnion({
+      productId: productId,
+      name: name,
+      price: price,
+      quantity: 1
+    })
+  }, { merge: true });
+
+  alert("Producto agregado al carrito.");
+  button.textContent = "🛒Quitar";
+  button.classList.add("btn-quitar");
+    }
+
+  });
+}
+ window.toggleCart = toggleCart;
 
     // Mostrar carrito
     async function mostrarCarrito() {
@@ -157,7 +184,7 @@
           items.map((item, index) => `
             <li>
               ${item.name} - $${item.price} (x${item.quantity})
-              <button onclick="eliminarDelCarrito('${item.productId}', ${index})">Eliminar</button>
+              <button onclick="eliminarDelCarrito('${item.productId}', ${index})" class="btn btn-danger" aria-label="Eliminar producto" ><i class="bi bi-trash"></i></button>
             </li>
           `).join("") + "</ul>";
       }
@@ -197,12 +224,21 @@
 
         alert("Producto eliminado del carrito.");
         mostrarCarrito(); // Volver a cargar el carrito
+        // Solo actualiza el botón del producto eliminado
+       const botones = document.querySelectorAll(`.product-card button[data-product-id="${productId}"]`);
+             botones.forEach(boton => {
+             boton.textContent = "🛒Comprar";
+            boton.classList.remove("btn-quitar");
+       });
+
        }
        } else {
          alert("Debes iniciar sesión para eliminar productos del carrito.");
        }
       });
    };
+
+    
      document.addEventListener("click", function (event) {
        const carrito = document.getElementById("carrito-contenido");
        const boton = document.getElementById("boton-carrito"); // tu botón para mostrar el carrito
