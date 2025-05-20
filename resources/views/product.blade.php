@@ -11,6 +11,9 @@
 <body>
 
   <h2>Mini E-commerce</h2>
+   <div class="d-flex justify-content-end p-3">
+  <button id="logout-btn" class="btn btn-outline-danger">Cerrar sesión</button>
+ </div>
   <div class="container mt-4">
       <div class="row">
       <!-- Productos -->
@@ -23,12 +26,13 @@
        <div id="carrito-contenido" class="carrito-flotante"></div>
      </div>
     </div>
+   
   </div>
 
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     // Configuración de Firebase
@@ -45,14 +49,21 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    let cerrandoSesion = false;
+    
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+    cargarProductos(user); // vuelve a pintar todos los botones correctamente
+       }
+      });
 
     // Hacer global para funciones
     window.firebaseAuth = auth;
     window.firebaseDb = db;
 
     // Cargar productos desde tu API
-    async function cargarProductos() {
-  try {
+   async function cargarProductos(user) {
+     try {
     const response = await fetch('http://localhost:8000/api/products');
     if (!response.ok) throw new Error('No se pudo obtener los productos');
     const data = await response.json();
@@ -65,44 +76,39 @@
       return;
     }
 
-    const auth = window.firebaseAuth;
-    const db = window.firebaseDb;
-
-    onAuthStateChanged(auth, async (user) => {
-      let cartItems = [];
-      if (user) {
-        const cartRef = doc(db, "carts", user.uid);
-        const cartSnap = await getDoc(cartRef);
-        if (cartSnap.exists()) {
-          cartItems = cartSnap.data().items || [];
-        }
+    let cartItems = [];
+    if (user) {
+      const cartRef = doc(db, "carts", user.uid);
+      const cartSnap = await getDoc(cartRef);
+      if (cartSnap.exists()) {
+        cartItems = cartSnap.data().items || [];
       }
+    }
 
-      data.forEach(product => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
+    data.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
 
-        const inCart = cartItems.some(item => item.productId === product.id);
+      const inCart = cartItems.some(item => item.productId === String(product.id));
 
-        card.innerHTML = `
-          <img src="${product.image}" alt="${product.name}">
-          <h3>${product.name}</h3>
-          <p class="price">Precio: $${product.price}</p>
-          <p>Stock: ${product.quantity}</p>
-          <button data-product-id="${product.id}">
-            ${inCart ? '🛒Quitar' : '🛒Comprar'}
-          </button>
-        `;
 
-        list.appendChild(card);
-      });
+      card.innerHTML = `
+      <img src="${product.image}" alt="${product.name}">
+      <h3>${product.name}</h3>
+       <p class="price">Precio: $${product.price}</p>
+      <p>Stock: ${product.quantity}</p>
+      <button data-product-id="${product.id}" class="${inCart ? 'btn-quitar' : ''}">
+      ${inCart ? '🛒Quitar' : '🛒Comprar'}
+      </button>`;
 
-      // Event listeners
-      document.querySelectorAll('.product-card button').forEach(button => {
-        button.addEventListener('click', () => {
-          const id = button.getAttribute('data-product-id');
-          toggleCart(id, button);
-        });
+
+      list.appendChild(card);
+    });
+
+    document.querySelectorAll('.product-card button').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-product-id');
+        toggleCart(id, button);
       });
     });
 
@@ -111,58 +117,55 @@
     document.getElementById('product-list').textContent = 'Error al cargar productos.';
   }
 }
-     cargarProductos()
      
     async function toggleCart(productId, button) {
-  const auth = window.firebaseAuth;
+  const user = auth.currentUser;
   const db = window.firebaseDb;
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      alert("Debes iniciar sesión para agregar o quitar productos.");
-      return;
-    }
+  if (!user) {
+    alert("Debes iniciar sesión para agregar o quitar productos.");
+    return;
+  }
 
-    const cartRef = doc(db, "carts", user.uid);
-    const cartSnap = await getDoc(cartRef);
-    let items = [];
+  const cartRef = doc(db, "carts", user.uid);
+  const cartSnap = await getDoc(cartRef);
+  let items = [];
 
-    if (cartSnap.exists()) {
-      items = cartSnap.data().items || [];
-    }
+  if (cartSnap.exists()) {
+    items = cartSnap.data().items || [];
+  }
 
-    const index = items.findIndex(item => item.productId === productId);
+  const index = items.findIndex(item => item.productId === productId);
 
-    if (index !== -1) {
-  // Ya está en carrito -> quitar
-  items.splice(index, 1);
-  await setDoc(cartRef, { items }, { merge: true });
-  alert("Producto eliminado del carrito.");
-  button.textContent = "🛒Comprar";
-  button.classList.remove("btn-quitar");
-} else {
-  // No está en carrito -> agregar
-  const card = button.closest('.product-card');
-  const name = card.querySelector('h3').textContent;
-  const priceText = card.querySelector('.price').textContent;
-  const price = parseFloat(priceText.replace('Precio: $', ''));
+  if (index !== -1) {
+    // Ya está en carrito -> quitar
+    items.splice(index, 1);
+    await setDoc(cartRef, { items }, { merge: true });
+    alert("Producto eliminado del carrito.");
+    button.textContent = "🛒Comprar";
+    button.classList.remove("btn-quitar");
+  } else {
+    // No está en carrito -> agregar
+    const card = button.closest('.product-card');
+    const name = card.querySelector('h3').textContent;
+    const priceText = card.querySelector('.price').textContent;
+    const price = parseFloat(priceText.replace('Precio: $', ''));
 
-  await setDoc(cartRef, {
-    items: arrayUnion({
-      productId: productId,
-      name: name,
-      price: price,
-      quantity: 1
-    })
-  }, { merge: true });
+    await setDoc(cartRef, {
+      items: arrayUnion({
+        productId: String(productId), // <- Asegúrate que es string
+        name: name,
+        price: price,
+        quantity: 1
+      })
+    }, { merge: true });
 
-  alert("Producto agregado al carrito.");
-  button.textContent = "🛒Quitar";
-  button.classList.add("btn-quitar");
-    }
-
-  });
+    alert("Producto agregado al carrito.");
+    button.textContent = "🛒Quitar";
+    button.classList.add("btn-quitar");
+  }
 }
+
  window.toggleCart = toggleCart;
 
     // Mostrar carrito
@@ -205,38 +208,45 @@
 
      
     window.mostrarCarrito = mostrarCarrito;
+
     window.eliminarDelCarrito = async function (productId, index) {
-      const auth = window.firebaseAuth;
-      const db = window.firebaseDb;
+  const user = auth.currentUser;
+  const db = window.firebaseDb;
 
-      onAuthStateChanged(auth, async (user) => {
-      if (user) {
-      const cartRef = doc(db, "carts", user.uid);
-      const cartSnap = await getDoc(cartRef);
+  if (!user) {
+    alert("Debes iniciar sesión para eliminar productos del carrito.");
+    return;
+  }
 
-      if (cartSnap.exists()) {
-        const items = cartSnap.data().items || [];
+  try {
+    const cartRef = doc(db, "carts", user.uid);
+    const cartSnap = await getDoc(cartRef);
 
-        // Filtrar el ítem específico por índice (para evitar errores con duplicados)
-        items.splice(index, 1);
+    if (cartSnap.exists()) {
+      const items = cartSnap.data().items || [];
 
-        await setDoc(cartRef, { items: items }, { merge: true });
+      // Eliminar por índice para evitar problemas con productos duplicados
+      items.splice(index, 1);
 
-        alert("Producto eliminado del carrito.");
-        mostrarCarrito(); // Volver a cargar el carrito
-        // Solo actualiza el botón del producto eliminado
-       const botones = document.querySelectorAll(`.product-card button[data-product-id="${productId}"]`);
-             botones.forEach(boton => {
-             boton.textContent = "🛒Comprar";
-            boton.classList.remove("btn-quitar");
-       });
+      await setDoc(cartRef, { items }, { merge: true });
 
-       }
-       } else {
-         alert("Debes iniciar sesión para eliminar productos del carrito.");
-       }
+      alert("Producto eliminado del carrito.");
+      mostrarCarrito(); // Recarga el contenido del carrito
+
+      // Actualizar el botón específico
+      const botones = document.querySelectorAll(`.product-card button[data-product-id="${productId}"]`);
+      botones.forEach((boton) => {
+        boton.textContent = "🛒Comprar";
+        boton.classList.remove("btn-quitar");
       });
-   };
+    } else {
+      alert("No se encontró el carrito del usuario.");
+    }
+  } catch (error) {
+    console.error("Error al eliminar del carrito:", error);
+    alert("Ocurrió un error al eliminar el producto del carrito.");
+  }
+};
 
     
      document.addEventListener("click", function (event) {
@@ -250,6 +260,19 @@
           carrito.style.display = "none";
          }
    });
+    // Cerrar sesión
+     document.getElementById('logout-btn').addEventListener('click', async () => {
+  cerrandoSesion = true;  // Evita que se ejecuten cosas cuando se desloguea
+
+  try {
+    await signOut(auth);
+    alert("Sesión cerrada exitosamente.");
+    window.location.href = "/login";
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+    alert("Ocurrió un error al cerrar sesión.");
+  }
+});
 
   </script>
 
