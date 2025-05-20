@@ -169,38 +169,87 @@
  window.toggleCart = toggleCart;
 
     // Mostrar carrito
-    async function mostrarCarrito() {
-     const user = auth.currentUser;
+   // Modificar mostrarCarrito para agregar total y botón finalizar compra
+async function mostrarCarrito() {
+  const user = auth.currentUser;
+  const contenedor = document.getElementById('carrito-contenido');
 
-     if (user) {
-     const cartRef = doc(db, "carts", user.uid);
-     const cartSnap = await getDoc(cartRef);
-     const contenedor = document.getElementById('carrito-contenido');
+  if (!user) {
+    alert("Debes iniciar sesión para ver el carrito.");
+    return;
+  }
 
-     if (cartSnap.exists()) {
-      const items = cartSnap.data().items || [];
+  const cartRef = doc(db, "carts", user.uid);
+  const cartSnap = await getDoc(cartRef);
 
-      if (items.length === 0) {
-        contenedor.innerHTML = "<h3>Carrito:</h3><p>El carrito está vacío.</p>";
-      } else {
-        contenedor.innerHTML = "<h3>Carrito:</h3><ul>" +
-          items.map((item, index) => `
+  if (cartSnap.exists()) {
+    const items = cartSnap.data().items || [];
+
+    if (items.length === 0) {
+      contenedor.innerHTML = "<h3>Carrito:</h3><p>El carrito está vacío.</p>";
+    } else {
+      // Calcular total
+      const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+      contenedor.innerHTML = `
+        <h3>Carrito:</h3>
+        <ul>
+          ${items.map((item, index) => `
             <li>
               ${item.name} - $${item.price} (x${item.quantity})
               <button onclick="eliminarDelCarrito('${item.productId}', ${index})" class="btn btn-danger" aria-label="Eliminar producto" ><i class="bi bi-trash"></i></button>
             </li>
-          `).join("") + "</ul>";
-      }
+          `).join("")}
+        </ul>
+        <p><strong>Total: $${total.toFixed(2)}</strong></p>
+        <button id="finalizar-compra-btn" class="btn btn-success">Finalizar compra</button>
+      `;
 
-      contenedor.style.display = 'block';
-      } else {
-      contenedor.innerHTML = "<h3>Carrito:</h3><p>Carrito vacío.</p>";
-      contenedor.style.display = 'block';
-      }
-     } else {
-      alert("Debes iniciar sesión para ver el carrito.");
+      // Agregar evento al botón finalizar compra
+      document.getElementById('finalizar-compra-btn').addEventListener('click', finalizarCompra);
     }
-    }
+
+    contenedor.style.display = 'block';
+  } else {
+    contenedor.innerHTML = "<h3>Carrito:</h3><p>Carrito vacío.</p>";
+    contenedor.style.display = 'block';
+  }
+}
+
+// Función para finalizar compra y vaciar carrito
+window.finalizarCompra = async function () {
+  const user = auth.currentUser;
+  const db = window.firebaseDb;
+
+  if (!user) {
+    alert("Debes iniciar sesión para finalizar la compra.");
+    return;
+  }
+
+  try {
+    const cartRef = doc(db, "carts", user.uid);
+    await setDoc(cartRef, { items: [] }, { merge: true });
+
+    alert("¡Gracias por tu compra!");
+
+    // Ocultar carrito
+    document.getElementById("carrito-contenido").style.display = "none";
+
+    // Cambiar todos los botones de productos a "Comprar"
+    const botones = document.querySelectorAll('.product-card button');
+    botones.forEach((boton) => {
+      boton.textContent = "🛒Comprar";
+      boton.classList.remove("btn-quitar");
+    });
+  } catch (error) {
+    console.error("Error al finalizar la compra:", error);
+    alert("Ocurrió un error al finalizar la compra.");
+  }
+};
+
+
+window.finalizarCompra = finalizarCompra;
+
       
     function cerrarCarrito() {
         document.getElementById('carrito-contenido').style.display = 'none';
