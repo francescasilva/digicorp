@@ -5,172 +5,25 @@
   <title>Mini E-commerce</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f3f3;
-      margin: 0;
-      padding: 20px;
-    }
-    h2 {
-      text-align: center;
-      color: #4a148c;
-    }
-    #product-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: center;
-    }
-    .product-card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 260px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.2s;
-    }
-    .product-card:hover {
-      transform: translateY(-5px);
-    }
-    .product-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
-    .product-card h3 {
-      margin: 16px;
-      font-size: 18px;
-    }
-    .product-card p {
-      margin: 0 16px 8px;
-      color: #555;
-    }
-    .product-card .price {
-      font-weight: bold;
-      color: #4a148c;
-    }
-    .product-card button {
-      margin: 16px;
-      padding: 10px;
-      background-color: #4a148c;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .product-card button:hover {
-      background-color: #6a1b9a;
-    }
+  <link rel="stylesheet" href="{{ asset('css/product.css') }}">
 
-    #carrito-contenido {
-     background: #fff;
-     max-width: 400px;
-    margin: 20px auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    padding: 20px;
-    font-family: Arial, sans-serif;
-}
-
-#carrito-contenido h3 {
-  color: #4a148c;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-#carrito-contenido ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-#carrito-contenido ul li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-  padding: 8px 0;
-  font-size: 16px;
-  color: #333;
-}
-
-#carrito-contenido ul li:last-child {
-  border-bottom: none;
-}
-
-/* Botón de eliminar producto (opcional) */
-#carrito-contenido ul li button {
-  background-color: #d32f2f;
-  border: none;
-  color: white;
-  padding: 5px 8px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-#carrito-contenido ul li button:hover {
-  background-color: #b71c1c;
-}
-  /* Botón del carrito en la esquina */
-#boton-carrito {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1001;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-/* Carrito flotante */
-.carrito-flotante {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  display: none;
-}
-
-  </style>
 </head>
 <body>
 
   <h2>Mini E-commerce</h2>
-<div class="container mt-4">
-  <div class="row">
-    <!-- Productos -->
-    <div class="col-md-12">
+  <div class="container mt-4">
+      <div class="row">
+      <!-- Productos -->
+      <div class="col-12 col-md-12">
       <div id="product-list">Cargando productos...</div>
-    </div>
-
-    <!-- Carrito -->
-    <div class="col-md-4">
+     </div>
+     <!-- Carrito -->
+     <div class="col-md-4">
       <button id="boton-carrito" onclick="mostrarCarrito()">🛒</button>
        <div id="carrito-contenido" class="carrito-flotante"></div>
+     </div>
     </div>
   </div>
-</div>
 
   <!-- Firebase -->
   <script type="module">
@@ -222,7 +75,7 @@
             <h3>${product.name}</h3>
             <p class="price">Precio: $${product.price}</p>
             <p>Stock: ${product.quantity}</p>
-            <button data-product-id="${product.id}">Agregar al carrito</button>
+            <button data-product-id="${product.id}">🛒Comprar</button>
           `;
 
           list.appendChild(card);
@@ -286,15 +139,15 @@
     };
 
     // Mostrar carrito
-   async function mostrarCarrito() {
+    async function mostrarCarrito() {
      const user = auth.currentUser;
 
      if (user) {
      const cartRef = doc(db, "carts", user.uid);
      const cartSnap = await getDoc(cartRef);
-    const contenedor = document.getElementById('carrito-contenido');
+     const contenedor = document.getElementById('carrito-contenido');
 
-    if (cartSnap.exists()) {
+     if (cartSnap.exists()) {
       const items = cartSnap.data().items || [];
 
       if (items.length === 0) {
@@ -310,28 +163,27 @@
       }
 
       contenedor.style.display = 'block';
-    } else {
+      } else {
       contenedor.innerHTML = "<h3>Carrito:</h3><p>Carrito vacío.</p>";
       contenedor.style.display = 'block';
+      }
+     } else {
+      alert("Debes iniciar sesión para ver el carrito.");
     }
-  } else {
-    alert("Debes iniciar sesión para ver el carrito.");
-  }
-}
-    
-  function cerrarCarrito() {
-  document.getElementById('carrito-contenido').style.display = 'none';
-}
+    }
+      
+    function cerrarCarrito() {
+        document.getElementById('carrito-contenido').style.display = 'none';
+     }
 
-
-
+     
     window.mostrarCarrito = mostrarCarrito;
     window.eliminarDelCarrito = async function (productId, index) {
-  const auth = window.firebaseAuth;
-  const db = window.firebaseDb;
+      const auth = window.firebaseAuth;
+      const db = window.firebaseDb;
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
+      onAuthStateChanged(auth, async (user) => {
+      if (user) {
       const cartRef = doc(db, "carts", user.uid);
       const cartSnap = await getDoc(cartRef);
 
@@ -345,12 +197,23 @@
 
         alert("Producto eliminado del carrito.");
         mostrarCarrito(); // Volver a cargar el carrito
-      }
-    } else {
-      alert("Debes iniciar sesión para eliminar productos del carrito.");
-    }
-  });
-  };
+       }
+       } else {
+         alert("Debes iniciar sesión para eliminar productos del carrito.");
+       }
+      });
+   };
+     document.addEventListener("click", function (event) {
+       const carrito = document.getElementById("carrito-contenido");
+       const boton = document.getElementById("boton-carrito"); // tu botón para mostrar el carrito
+       if (
+         carrito.style.display === "block" &&
+        !carrito.contains(event.target) &&
+         !boton.contains(event.target) )
+        {
+          carrito.style.display = "none";
+         }
+   });
 
   </script>
 

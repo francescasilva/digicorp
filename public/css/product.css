@@ -1,0 +1,147 @@
+
+
+body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #4a148c;
+    }
+    #product-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 260px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    .product-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .product-card h3 {
+      margin: 16px;
+      font-size: 18px;
+    }
+    .product-card p {
+      margin: 0 16px 8px;
+      color: #555;
+    }
+    .product-card .price {
+      font-weight: bold;
+      color: #4a148c;
+    }
+    .product-card button {
+      margin: 16px;
+      padding: 10px;
+      background-color: #4a148c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .product-card button:hover {
+      background-color: #6a1b9a;
+    }
+
+    #carrito-contenido {
+     background: #fff;
+     max-width: 400px;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+#carrito-contenido h3 {
+  color: #4a148c;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+#carrito-contenido ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#carrito-contenido ul li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+#carrito-contenido ul li:last-child {
+  border-bottom: none;
+}
+
+/* Botón de eliminar producto (opcional) */
+#carrito-contenido ul li button {
+  background-color: #d32f2f;
+  border: none;
+  color: white;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+#carrito-contenido ul li button:hover {
+  background-color: #b71c1c;
+}
+  /* Botón del carrito en la esquina */
+#boton-carrito {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Carrito flotante */
+.carrito-flotante {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  display: none;
+}
