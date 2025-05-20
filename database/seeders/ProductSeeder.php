@@ -20,7 +20,7 @@ class ProductSeeder extends Seeder
             'name' => 'IMPRESORA EPSON ',
             'quantity' => 10,
             'price' => 1200.00,
-            'image' => 'https://www.infotec.com.pe/43524-thickbox_default/impresora-epson-l14150-c11ch95303-a3-wifi-multifuncional.jpg ', // URL de ejemplo
+            'image' => 'https://mediaserver.goepson.com/ImConvServlet/imconv/d6c225f67f79bd2806c074128dd55c3c0404971d/1200Wx1200H?use=banner&hybrisId=B2C&assetDescr=L4150_690x460_1', // URL de ejemplo
         ]);
 
         Product::create([

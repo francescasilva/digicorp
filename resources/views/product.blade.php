@@ -96,7 +96,7 @@
 
 
       card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}">
+      <img  src="${product.image}" alt="${product.name}">
       <h3>${product.name}</h3>
        <p class="price">Precio: $${product.price}</p>
       <p>Stock: ${product.quantity}</p>
