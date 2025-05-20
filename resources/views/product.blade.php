@@ -117,6 +117,40 @@
 #carrito-contenido ul li button:hover {
   background-color: #b71c1c;
 }
+  /* Botón del carrito en la esquina */
+#boton-carrito {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Carrito flotante */
+.carrito-flotante {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  display: none;
+}
 
   </style>
 </head>
@@ -126,16 +160,14 @@
 <div class="container mt-4">
   <div class="row">
     <!-- Productos -->
-    <div class="col-md-8">
+    <div class="col-md-12">
       <div id="product-list">Cargando productos...</div>
     </div>
 
     <!-- Carrito -->
     <div class="col-md-4">
-      <div id="carrito-contenido" style="display: none;"></div>
-      <button onclick="mostrarCarrito()" type="button" class="btn btn-primary">
-       <i class="bi bi-cart"></i> Ver carrito
-      </button>
+      <button id="boton-carrito" onclick="mostrarCarrito()">🛒</button>
+       <div id="carrito-contenido" class="carrito-flotante"></div>
     </div>
   </div>
 </div>
@@ -255,11 +287,11 @@
 
     // Mostrar carrito
    async function mostrarCarrito() {
-  const user = auth.currentUser;
+     const user = auth.currentUser;
 
-  if (user) {
-    const cartRef = doc(db, "carts", user.uid);
-    const cartSnap = await getDoc(cartRef);
+     if (user) {
+     const cartRef = doc(db, "carts", user.uid);
+     const cartSnap = await getDoc(cartRef);
     const contenedor = document.getElementById('carrito-contenido');
 
     if (cartSnap.exists()) {
@@ -286,6 +318,11 @@
     alert("Debes iniciar sesión para ver el carrito.");
   }
 }
+    
+  function cerrarCarrito() {
+  document.getElementById('carrito-contenido').style.display = 'none';
+}
+
 
 
     window.mostrarCarrito = mostrarCarrito;
