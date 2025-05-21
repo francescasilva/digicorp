@@ -1,5 +1,5 @@
 
-@media (max-width: 768px){
+
 body {
       font-family: Arial, sans-serif;
       background: #f3f3f3;
@@ -172,4 +172,4 @@ body {
 #carrito-contenido img:hover {
   transform: scale(1.05);
 }
-}
+
