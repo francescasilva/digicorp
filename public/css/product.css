@@ -4,11 +4,18 @@ body {
       font-family: Arial, sans-serif;
       background: #f3f3f3;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
     h2 {
       text-align: center;
-      color: #4a148c;
+      color: white;
+      margin: 0;
+    }
+    .titulo{
+       margin:0;
+       background: #4a148c;
+       padding: 20px;
+       border:0
     }
     #product-list {
       display: flex;
@@ -166,13 +173,3 @@ body {
   transform: scale(1.05);
 }
 
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5); /* negro semi-transparente */
-  z-index: 999; /* que esté encima del contenido */
-  display: none; /* oculto por defecto */
-}

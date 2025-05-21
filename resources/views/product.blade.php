@@ -11,9 +11,10 @@
 </head>
 <body>
 
-  <h2>Mini E-commerce</h2>
+ <div class="titulo"><h2>Mini E-commerce</h2></div>
+  
    <div class="d-flex justify-content-end p-3">
-  <button id="logout-btn" class="btn btn-outline-danger">Cerrar sesión</button>
+  <button id="logout-btn" class="btn btn-danger">Cerrar sesión</button>
  </div>
   <div class="container mt-4">
       <div class="row">
@@ -115,11 +116,11 @@
       });
     });
 
-  } catch (error) {
+    } catch (error) {
     console.error('Error al obtener los productos:', error);
     document.getElementById('product-list').textContent = 'Error al cargar productos.';
-  }
-}
+    }
+   }
      
     async function toggleCart(productId, button) {
   const user = auth.currentUser;
