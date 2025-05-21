@@ -99,7 +99,7 @@
       card.innerHTML = `
       <img  src="${product.image}" alt="${product.name}">
       <h3>${product.name}</h3>
-       <p class="price">Precio: $${product.price}</p>
+       <p class="price">Precio: S/.${product.price}</p>
       <p>Stock: ${product.quantity}</p>
       <button data-product-id="${product.id}" class="${inCart ? 'btn-quitar' : ''}">
       ${inCart ? '🛒Quitar' : '🛒Comprar'}
@@ -123,25 +123,25 @@
    }
      
     async function toggleCart(productId, button) {
-  const user = auth.currentUser;
-  const db = window.firebaseDb;
+    const user = auth.currentUser;
+    const db = window.firebaseDb;
 
-  if (!user) {
-    alert("Debes iniciar sesión para agregar o quitar productos.");
-    return;
-  }
+     if (!user) {
+     alert("Debes iniciar sesión para agregar o quitar productos.");
+     return;
+     }
+ 
+    const cartRef = doc(db, "carts", user.uid);
+    const cartSnap = await getDoc(cartRef);
+    let items = [];
 
-  const cartRef = doc(db, "carts", user.uid);
-  const cartSnap = await getDoc(cartRef);
-  let items = [];
-
-  if (cartSnap.exists()) {
+   if (cartSnap.exists()) {
     items = cartSnap.data().items || [];
-  }
+   }
 
-  const index = items.findIndex(item => item.productId === productId);
+     const index = items.findIndex(item => item.productId === productId);
 
-  if (index !== -1) {
+    if (index !== -1) {
     // Ya está en carrito -> quitar
     items.splice(index, 1);
     await setDoc(cartRef, { items }, { merge: true });
@@ -153,7 +153,7 @@
     const card = button.closest('.product-card');
     const name = card.querySelector('h3').textContent;
     const priceText = card.querySelector('.price').textContent;
-    const price = parseFloat(priceText.replace('Precio: $', ''));
+    const price = parseFloat(priceText.replace('Precio: S/.', ''));
     const image = card.querySelector('img')?.src || ''; // <- extraer la imagen
     const stockText = card.querySelector('p:nth-of-type(2)')?.textContent || '';
     const stock = parseInt(stockText.replace('Stock: ', '')) || 0;
@@ -214,7 +214,7 @@ async function mostrarCarrito() {
           <img src="${item.image}" alt="${item.name}" class="rounded" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
           <div>
             <h5 class="mb-1 fw-semibold">${item.name}</h5>
-            <p class="mb-1 fw-semibold" style="color: #4a148c; font-family: 'Arial', Helvetica, sans-serif;">Precio: <strong>$${item.price}</strong></p>
+            <p class="mb-1 fw-semibold" style="color: #4a148c; font-family: 'Arial', Helvetica, sans-serif;">Precio: <strong>S/.${item.price}</strong></p>
             <p class="mb-1">Cantidad: <strong>${item.quantity}</strong></p>
             
           </div>
@@ -227,7 +227,7 @@ async function mostrarCarrito() {
   </ul>
 
   <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded">
-    <h5 class="m-0 fw-bold text-success">Total: $${total.toFixed(2)}</h5>
+    <h5 class="m-0 fw-bold text-success">Total: S/.${total.toFixed(2)}</h5>
     <button id="finalizar-compra-btn" class="btn btn-success">Finalizar compra</button>
   </div>
 `;
