@@ -47,15 +47,14 @@
        style="background-color:rgb(116, 38, 199); border-color: #6a11cb; transition: background-color 0.3s, border-color 0.3s;" 
        onmouseover="this.style.backgroundColor='#5a0fba';" 
        onmouseout="this.style.backgroundColor='#6a11cb';">
-  Iniciar Sesión
+        Iniciar Sesión
     </button>
 
     </div>
   </div>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
