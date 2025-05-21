@@ -1,4 +1,4 @@
-## PROYECTO MINI E-COMmERCE
+## PROYECTO MINI E-COMMERCE
 
   LINK:https://digicorp-production.up.railway.app/login
 
