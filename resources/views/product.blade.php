@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mini E-commerce</title>
- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('css/product.css') }}">
 
 </head>
 <body>
 
- <div class="titulo"><h2>Mini E-commerce</h2></div>
+  <div class="titulo"><h2>Mini E-commerce</h2></div>
   
    <div class="d-flex justify-content-end p-3">
   <button id="logout-btn" class="btn btn-danger">Cerrar sesión</button>
@@ -148,7 +147,7 @@
     alert("Producto eliminado del carrito.");
     button.textContent = "🛒Comprar";
     button.classList.remove("btn-quitar");
-  } else {
+   } else {
     // No está en carrito -> agregar
     const card = button.closest('.product-card');
     const name = card.querySelector('h3').textContent;
@@ -173,27 +172,27 @@
     alert("Producto agregado al carrito.");
     button.textContent = "🛒Quitar";
     button.classList.add("btn-quitar");
-  }
-}
+   }
+   }
 
- window.toggleCart = toggleCart;
+   window.toggleCart = toggleCart;
 
     // Mostrar carrito
    // Modificar mostrarCarrito para agregar total y botón finalizar compra
-async function mostrarCarrito() {
-  const user = auth.currentUser;
-  const contenedor = document.getElementById('carrito-contenido');
+   async function mostrarCarrito() {
+    const user = auth.currentUser;
+    const contenedor = document.getElementById('carrito-contenido');
 
 
-  if (!user) {
+    if (!user) {
     alert("Debes iniciar sesión para ver el carrito.");
     return;
-  }
+    }
 
-  const cartRef = doc(db, "carts", user.uid);
-  const cartSnap = await getDoc(cartRef);
+   const cartRef = doc(db, "carts", user.uid);
+   const cartSnap = await getDoc(cartRef);
 
-  if (cartSnap.exists()) {
+   if (cartSnap.exists()) {
     const items = cartSnap.data().items || [];
 
     if (items.length === 0) {
@@ -224,13 +223,13 @@ async function mostrarCarrito() {
         </button>
       </li>
     `).join("")}
-  </ul>
+    </ul>
 
-  <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded">
+   <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded">
     <h5 class="m-0 fw-bold text-success">Total: S/.${total.toFixed(2)}</h5>
     <button id="finalizar-compra-btn" class="btn btn-success">Finalizar compra</button>
-  </div>
-`;
+    </div>
+   `;
        
       // Agregar evento al botón finalizar compra
       document.getElementById('finalizar-compra-btn').addEventListener('click', finalizarCompra);
@@ -240,20 +239,20 @@ async function mostrarCarrito() {
      } else {
       contenedor.innerHTML = "<h3>Carrito:</h3><p>Carrito vacío.</p>";
       contenedor.style.display = 'block';
-  }
-}
+    }
+   }
 
-// Función para finalizar compra y vaciar carrito
-window.finalizarCompra = async function () {
-  const user = auth.currentUser;
-  const db = window.firebaseDb;
+   // Función para finalizar compra y vaciar carrito
+   window.finalizarCompra = async function () {
+    const user = auth.currentUser;
+   const db = window.firebaseDb;
 
-  if (!user) {
+    if (!user) {
     alert("Debes iniciar sesión para finalizar la compra.");
     return;
-  }
+    }
 
-  try {
+    try {
     const cartRef = doc(db, "carts", user.uid);
     await setDoc(cartRef, { items: [] }, { merge: true });
 
@@ -269,14 +268,14 @@ window.finalizarCompra = async function () {
       boton.textContent = "🛒Comprar";
       boton.classList.remove("btn-quitar");
     });
-  } catch (error) {
+   } catch (error) {
     console.error("Error al finalizar la compra:", error);
     alert("Ocurrió un error al finalizar la compra.");
-  }
-};
+   }
+   };
 
 
-window.finalizarCompra = finalizarCompra;
+    window.finalizarCompra = finalizarCompra;
 
       
     function cerrarCarrito() {
@@ -287,15 +286,15 @@ window.finalizarCompra = finalizarCompra;
     window.mostrarCarrito = mostrarCarrito;
 
     window.eliminarDelCarrito = async function (productId, index) {
-  const user = auth.currentUser;
-  const db = window.firebaseDb;
+    const user = auth.currentUser;
+   const db = window.firebaseDb;
 
-  if (!user) {
+    if (!user) {
     alert("Debes iniciar sesión para eliminar productos del carrito.");
     return;
-  }
+    }
 
-  try {
+    try {
     const cartRef = doc(db, "carts", user.uid);
     const cartSnap = await getDoc(cartRef);
 
@@ -319,11 +318,11 @@ window.finalizarCompra = finalizarCompra;
     } else {
       alert("No se encontró el carrito del usuario.");
     }
-  } catch (error) {
+    } catch (error) {
     console.error("Error al eliminar del carrito:", error);
     alert("Ocurrió un error al eliminar el producto del carrito.");
-  }
-};
+   }
+   };
 
     
      document.addEventListener("click", function (event) {
@@ -339,17 +338,17 @@ window.finalizarCompra = finalizarCompra;
    });
     // Cerrar sesión
      document.getElementById('logout-btn').addEventListener('click', async () => {
-  cerrandoSesion = true;  // Evita que se ejecuten cosas cuando se desloguea
+   cerrandoSesion = true;  // Evita que se ejecuten cosas cuando se desloguea
 
-  try {
+   try {
     await signOut(auth);
     alert("Sesión cerrada exitosamente.");
     window.location.href = "/login";
-  } catch (error) {
+   } catch (error) {
     console.error("Error al cerrar sesión:", error);
     alert("Ocurrió un error al cerrar sesión.");
-  }
-});
+   }
+   });
 
   </script>
 
